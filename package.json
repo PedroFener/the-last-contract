@@ -1,0 +1,26 @@
+{
+  "name": "the-last-contract",
+  "version": "1.1.0",
+  "description": "THE LAST CONTRACT — jogo de ação 2D top-down em pixel art neon (HTML5 Canvas, offline).",
+  "private": true,
+  "license": "MIT",
+  "author": "PedroFener",
+  "scripts": {
+    "test": "node --test tests/maps.test.js",
+    "serve": "npx --yes http-server www -p 8080 -c-1",
+    "maps": "python3 tools/build_maps.py www/js/maps.js",
+    "android:add": "npx cap add android",
+    "android:native": "node scripts/apply-native.mjs",
+    "android:sync": "npx cap sync android",
+    "android:debug": "npx cap add android && node scripts/apply-native.mjs && npx cap sync android && cd android && ./gradlew assembleDebug",
+    "android:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  },
+  "engines": { "node": ">=22" }
+}

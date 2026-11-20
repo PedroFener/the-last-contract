@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0610">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>THE LAST CONTRACT</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- MENU PRINCIPAL -->
+  <section id="menu" class="screen">
+    <div class="panel title-panel">
+      <div class="logo"><span class="l1">THE LAST</span><span class="l2">CONTRACT</span></div>
+      <p class="tag">Ninguém sai vivo do último contrato.</p>
+      <div class="buttons">
+        <button data-act="continue" id="btnContinue">CONTINUAR</button>
+        <button data-act="new">NOVO JOGO</button>
+        <button data-act="levels">CONTRATOS</button>
+        <button data-act="settings">CONFIGURAÇÕES</button>
+        <button data-act="howto">COMO JOGAR</button>
+      </div>
+      <p class="foot">v1.1 · HTML5 · offline</p>
+    </div>
+  </section>
+
+  <!-- SELEÇÃO DE FASES -->
+  <section id="levels" class="screen">
+    <div class="panel wide">
+      <h2>CONTRATOS</h2>
+      <div id="levelList" class="level-list"></div>
+      <div class="buttons row"><button data-act="back">VOLTAR</button></div>
+    </div>
+  </section>
+
+  <!-- BRIEFING -->
+  <section id="briefing" class="screen">
+    <div class="panel">
+      <p class="kicker" id="bKicker">FASE 1</p>
+      <h2 id="bTitle">O CONTRATO</h2>
+      <p id="bText" class="brief"></p>
+      <p class="objective"><b>OBJETIVO:</b> <span id="bObj"></span></p>
+      <p class="hint" id="bHint"></p>
+      <div class="buttons row">
+        <button data-act="start">INICIAR</button>
+        <button data-act="back">VOLTAR</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAUSA -->
+  <section id="pause" class="screen">
+    <div class="panel">
+      <h2>PAUSA</h2>
+      <p class="kicker" id="pLevel"></p>
+      <div class="buttons">
+        <button data-act="resume">CONTINUAR</button>
+        <button data-act="restart">REINICIAR FASE</button>
+        <button data-act="settings">CONFIGURAÇÕES</button>
+        <button data-act="quit">SAIR PARA O MENU</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIGURAÇÕES -->
+  <section id="settings" class="screen">
+    <div class="panel wide">
+      <h2>CONFIGURAÇÕES</h2>
+      <div id="settingsList" class="settings"></div>
+      <p class="hint">Qualidade gráfica é aplicada ao iniciar/reiniciar uma fase.</p>
+      <div class="buttons row">
+        <button data-act="back">VOLTAR</button>
+        <button data-act="wipe" class="danger">APAGAR PROGRESSO</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO JOGAR -->
+  <section id="howto" class="screen">
+    <div class="panel wide">
+      <h2>COMO JOGAR</h2>
+      <div class="howto">
+        <div>
+          <h3>PC</h3>
+          <p><b>WASD</b> mover · <b>Shift</b> correr<br><b>Mouse</b> mirar · <b>Clique esq.</b> atirar<br><b>Clique dir. / E</b> corpo a corpo<br><b>Espaço</b> esquiva · <b>R</b> recarregar<br><b>Q / roda / 1-5</b> trocar arma<br><b>G</b> mandar o cão · <b>Esc / P</b> pausa</p>
+        </div>
+        <div>
+          <h3>CELULAR</h3>
+          <p><b>Lado esquerdo</b>: analógico de movimento (empurre até o fim para correr)<br><b>Lado direito</b>: arraste para mirar; arraste mais longe para atirar<br>Botões: <b>ESQUIVA</b>, <b>GOLPE</b>, <b>CÃO</b>, <b>RECARGA</b>, <b>ARMA</b>, <b>II</b> pausa</p>
+        </div>
+        <div>
+          <h3>GAMEPAD</h3>
+          <p><b>Analógico esq.</b> mover · <b>Analógico dir.</b> mirar<br><b>RT/RB</b> atirar · <b>A</b> esquiva<br><b>B/LT</b> corpo a corpo · <b>X</b> recarregar<br><b>Y/LB</b> trocar arma · <b>R3 / ↑</b> cão<br><b>Start</b> pausa</p>
+        </div>
+      </div>
+      <p class="hint"><b>Finalizações:</b> um soco derruba o inimigo; com ele no chão, aperte GOLPE para pisotear (ou esfaquear, se estiver com a faca/lápis), ou ATIRE de perto para uma execução com a arma. <b>Pitbull:</b> a cada 3 abates o cão fica pronto — mire num inimigo e aperte G / CÃO: ele derruba o alvo e arranca a arma da mão dele. Finalize enquanto o cão segura! Inimigos desarmados tentam pegar a arma de volta. Tiros fazem barulho; faca e lápis são silenciosos.</p>
+      <div class="buttons row"><button data-act="back">VOLTAR</button></div>
+    </div>
+  </section>
+
+  <!-- RESULTADO -->
+  <section id="results" class="screen">
+    <div class="panel">
+      <p class="kicker" id="rKicker">CONTRATO CUMPRIDO</p>
+      <h2 id="rTitle"></h2>
+      <div class="results">
+        <table id="rTable"></table>
+        <div class="rating"><span>AVALIAÇÃO</span><b id="rRating">S</b><i id="rNew"></i></div>
+      </div>
+      <div class="buttons row">
+        <button data-act="next" id="btnNext">PRÓXIMO CONTRATO</button>
+        <button data-act="restart">REPETIR</button>
+        <button data-act="quit">MENU</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DERROTA -->
+  <section id="gameover" class="screen">
+    <div class="panel">
+      <h2 class="red">CONTRATO FALHOU</h2>
+      <p id="goText" class="brief"></p>
+      <div class="buttons row">
+        <button data-act="restart">TENTAR NOVAMENTE</button>
+        <button data-act="quit">MENU</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- VITÓRIA FINAL -->
+  <section id="victory" class="screen">
+    <div class="panel">
+      <p class="kicker">FIM</p>
+      <div class="logo small"><span class="l1">THE LAST</span><span class="l2">CONTRACT</span></div>
+      <p class="brief">O Arquiteto caiu. Não há mais contratos com o seu nome. Pela primeira vez em anos, o telefone fica em silêncio.</p>
+      <p id="vTotal" class="objective"></p>
+      <div class="buttons row"><button data-act="quit">MENU PRINCIPAL</button></div>
+    </div>
+  </section>
+
+  <!-- AVISO DE ORIENTAÇÃO -->
+  <div id="rotate"><div><div class="phone"></div><p>Gire o aparelho para a horizontal</p></div></div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/maps.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# Dependências
+node_modules/
+
+# Projeto Android gerado pelo Capacitor (recriado por `npm run android:prepare`)
+/android/
+/ios/
+
+# Saídas de build
+*.apk
+*.aab
+build/
+dist/
+.gradle/
+local.properties
+
+# Assinatura e segredos — NUNCA versionar
+*.keystore
+*.jks
+keystore.properties
+.env
+.env.*
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log
+__pycache__/

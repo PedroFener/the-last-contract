@@ -1,0 +1,8 @@
+{
+  "appId": "com.pedrofener.lastcontract",
+  "appName": "The Last Contract",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#050308"
+  }
+}

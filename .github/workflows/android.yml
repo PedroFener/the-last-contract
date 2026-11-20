@@ -1,0 +1,119 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # necessário apenas para publicar releases em tags v*
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    name: Testar e compilar APK
+    runs-on: ubuntu-latest
+    env:
+      TLC_VERSION_CODE: ${{ github.run_number }}
+      HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEYSTORE_PASSWORD != '' && secrets.ANDROID_KEY_ALIAS != '' && secrets.ANDROID_KEY_PASSWORD != '' }}
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Gradle (cache)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+
+      - name: Testes das fases e mapas
+        run: npm test
+
+      - name: Criar projeto Android (Capacitor)
+        run: npx cap add android
+
+      - name: Aplicar tela cheia, paisagem, ícones e splash
+        run: node scripts/apply-native.mjs
+
+      - name: Sincronizar jogo com o Android
+        run: npx cap sync android
+
+      - name: Compilar APK de depuração
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Nomear APK
+        id: apk
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          mkdir -p dist
+          cp android/app/build/outputs/apk/debug/app-debug.apk "dist/TheLastContract-v${VERSION}-debug.apk"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          unzip -l dist/*.apk | grep -q "public/index.html" || { echo "::error::jogo ausente no APK"; exit 1; }
+          ls -la dist
+
+      # ----- Versão assinada (opcional; requer GitHub Secrets) -----
+      - name: Compilar APK de produção assinado
+        if: env.HAS_KEYSTORE == 'true'
+        working-directory: android
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/tlc.jks"
+          ./gradlew assembleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/tlc.jks" \
+            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+          cp app/build/outputs/apk/release/app-release.apk "../dist/TheLastContract-v${{ steps.apk.outputs.version }}.apk"
+          rm -f "$RUNNER_TEMP/tlc.jks"
+
+      - name: Publicar APK como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: TheLastContract-v${{ steps.apk.outputs.version }}-apk
+          path: dist/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Escolher APK da release
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: rel
+        run: |
+          V=${{ steps.apk.outputs.version }}
+          if [ ! -f "dist/TheLastContract-v${V}.apk" ]; then
+            cp "dist/TheLastContract-v${V}-debug.apk" "dist/TheLastContract-v${V}.apk"
+            echo "::warning::Release publicada com APK de depuração (cadastre os secrets de assinatura)."
+          fi
+          echo "file=dist/TheLastContract-v${V}.apk" >> "$GITHUB_OUTPUT"
+
+      - name: Criar/atualizar release (somente em tags v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: The Last Contract ${{ github.ref_name }}
+          body_path: .github/release-notes.md
+          files: ${{ steps.rel.outputs.file }}
+          make_latest: true
