@@ -131,8 +131,7 @@ O workflow `.github/workflows/android.yml` faz tudo na nuvem: instala o Capacito
 
 No fim, compila o APK.
 
-- **Push no `main`:** o APK aparece em *Actions → Android APK → Artifacts*.
-- **Tag `v*`** (ex.: `git tag v1.1.0 && git push --tags`): cria uma Release com o APK para baixar direto no celular.
+- **Push no `main`:** o APK aparece em *Actions → Android APK → Artifacts* e a Release `v<versão do package.json>` é criada ou atualizada com o APK. Para lançar uma versão nova, aumente `version` no `package.json`.
 - **APK assinado de produção** (opcional, para a Play Store): cadastre os secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` e `ANDROID_KEY_PASSWORD`. Sem eles, o APK é de depuração: funciona normalmente no celular, mas não serve para a loja.
 
 Para compilar no PC, com Android Studio instalado:
